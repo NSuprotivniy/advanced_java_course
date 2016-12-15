@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedHashMap;
+
 import static org.junit.Assert.*;
 
 /**
@@ -65,6 +67,42 @@ public class LFUCacheTest{
 
         Assert.assertArrayEquals("Iterator sequence should to be equal to entry sequence",
                 cache_array, str_array);
+    }
+
+    @Test
+    public void LFUReplacementTest() {
+
+        String LFU = "LFU";
+
+
+        for (int i = 0; i < 5; i++) {
+            cache.addCacheEntry(i, Integer.toString(i + 2));
+            for (int j = 0; j < 15; j++) {
+                cache.getCacheEntry(i);
+            }
+        }
+
+        cache.addCacheEntry(5, LFU);
+        for (int i = 0; i < 10; i++) {
+            cache.getCacheEntry(5);
+        }
+
+        for (int i = 6; i < 10; i++) {
+            cache.addCacheEntry(i, Integer.toString(i + 2));
+            for (int j = 0; j < 20; j++) {
+                cache.getCacheEntry(i);
+            }
+        }
+
+        String str = "new string";
+
+        cache.addCacheEntry(10, str);
+
+        LFU = cache.getCacheEntry(5);
+
+        Assert.assertEquals("LFU should be null", LFU, null);
+
+
     }
 
 }
