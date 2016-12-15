@@ -4,22 +4,23 @@ import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
 
+/*
+   Класс реализует LFU кэш.
+ */
 
-public class LFUCache<T> implements Iterable<T> {
+public class LFUCache<K, V> implements Iterable<V> {
 
+    // Класс содержит значение одного элемента кэша и частоту его использования.
     class CacheEntry implements Comparable<CacheEntry>
     {
-        private T data;
+        private V data;
         private int frequency;
 
-        // default constructor
-        private CacheEntry()
-        {}
 
-        public T getData() {
+        public V getData() {
             return data;
         }
-        public void setData(T data) {
+        public void setData(V data) {
             this.data = data;
         }
 
@@ -40,19 +41,15 @@ public class LFUCache<T> implements Iterable<T> {
 
     private int initialCapacity = 10;
 
-    private HashMap<Integer, CacheEntry> cacheMap = new LinkedHashMap<Integer, CacheEntry>();
-
-
-/* LinkedHashMap is used because it has features of both HashMap and LinkedList.
- * Thus, we can get an entry in O(1) and also, we can iterate over it easily.
- * */
+    // Используется LinkedHashMap, который позволяет итерироваться по структуре для поиска LFU.
+    private HashMap<K, CacheEntry> cacheMap = new LinkedHashMap<K, CacheEntry>();
 
     public LFUCache(int initialCapacity)
     {
         this.initialCapacity = initialCapacity;
     }
 
-    public void addCacheEntry(int key, T data)
+    public void add(K key, V data)
     {
 
         if(!isFull())
@@ -65,7 +62,7 @@ public class LFUCache<T> implements Iterable<T> {
         }
         else
         {
-            int entryKeyToBeRemoved = getLFUKey();
+            K entryKeyToBeRemoved = getLFUKey();
             cacheMap.remove(entryKeyToBeRemoved);
 
             CacheEntry temp = new CacheEntry();
@@ -76,12 +73,12 @@ public class LFUCache<T> implements Iterable<T> {
         }
     }
 
-    public int getLFUKey()
+    public K getLFUKey()
     {
-        int key = 0;
+        K key = null;
         int minFreq = Integer.MAX_VALUE;
 
-        for(Map.Entry<Integer, CacheEntry> entry : cacheMap.entrySet())
+        for(Map.Entry<K, CacheEntry> entry : cacheMap.entrySet())
         {
             if(minFreq > entry.getValue().frequency)
             {
@@ -92,16 +89,16 @@ public class LFUCache<T> implements Iterable<T> {
         return key;
     }
 
-    public T getCacheEntry(int key)
+    public V get(K key)
     {
-        if(cacheMap.containsKey(key))  // cache hit
+        if(cacheMap.containsKey(key))
         {
             CacheEntry temp = cacheMap.get(key);
             temp.frequency++;
             cacheMap.put(key, temp);
             return temp.data;
         }
-        return null; // cache miss
+        return null;
     }
 
     public void clear() {
@@ -116,13 +113,13 @@ public class LFUCache<T> implements Iterable<T> {
         return false;
     }
 
-    public Iterator<T> iterator() {
+    public Iterator<V> iterator() {
         return new LFUCahceIterator();
     }
 
-    private class LFUCahceIterator implements Iterator<T> {
+    private class LFUCahceIterator implements Iterator<V> {
 
-        Iterator<Map.Entry<Integer, CacheEntry>> iterator = cacheMap.entrySet().iterator();
+        Iterator<Map.Entry<K, CacheEntry>> iterator = cacheMap.entrySet().iterator();
 
         @Override
         public boolean hasNext() {
@@ -130,7 +127,7 @@ public class LFUCache<T> implements Iterable<T> {
         }
 
         @Override
-        public T next() {
+        public V next() {
             return iterator.next().getValue().data;
         }
 
@@ -138,7 +135,7 @@ public class LFUCache<T> implements Iterable<T> {
 
 
     public static void main(String[] args) {
-        LFUCache<String> cache = new LFUCache<>(10);
+        LFUCache<Integer, String> cache = new LFUCache<>(10);
 
         List<String> list = new ArrayList<>();
         RandomStringUtils randomString = new RandomStringUtils();
@@ -153,7 +150,7 @@ public class LFUCache<T> implements Iterable<T> {
         Random randInt = new Random();
         for (int i = 0; i < 50; i++) {
             int key = randInt.nextInt(20);
-            cache.addCacheEntry(key , list.get(key));
+            cache.add(key , list.get(key));
             System.out.print(key + " ");
         }
         System.out.println("\n\nCache entry");

@@ -4,16 +4,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.LinkedHashMap;
-
-import static org.junit.Assert.*;
-
 /**
  * Created by nsuprotivniy on 15.12.16.
  */
 public class LFUCacheTest{
 
-    private LFUCache<String> cache = new LFUCache<>(10);
+    private LFUCache<Integer, String> cache = new LFUCache<>(10);
 
     @Before
     public void clearCache() {
@@ -21,10 +17,10 @@ public class LFUCacheTest{
     }
 
     @Test
-    public void addCacheEntry() throws Exception {
+    public void addTest() throws Exception {
         String str1 = "TestString";
-        cache.addCacheEntry(1, str1);
-        String str2 = cache.getCacheEntry(1);
+        cache.add(1, str1);
+        String str2 = cache.get(1);
         Assert.assertTrue("Cache entry should be equal to 'TestString'", str1.compareTo(str2) == 0);
     }
 
@@ -34,14 +30,14 @@ public class LFUCacheTest{
         String EFU = "EFU";
         String MFU = "MFU";
 
-        cache.addCacheEntry(0, LFU);
-        cache.addCacheEntry(1, EFU);
-        cache.addCacheEntry(2, MFU);
+        cache.add(0, LFU);
+        cache.add(1, EFU);
+        cache.add(2, MFU);
 
         for (int i = 0; i < 10; i++) {
-            if (i < 2) cache.getCacheEntry(0);
-            if (i < 3) cache.getCacheEntry(1);
-            if (i < 5) cache.getCacheEntry(2);
+            if (i < 2) cache.get(0);
+            if (i < 3) cache.get(1);
+            if (i < 5) cache.get(2);
         }
 
         int i = cache.getLFUKey();
@@ -57,7 +53,7 @@ public class LFUCacheTest{
 
         for (int i = 0; i < 10; i++) {
             str_array[i] = Integer.toString(i);
-            cache.addCacheEntry(i, str_array[i]);
+            cache.add(i, str_array[i]);
         }
 
         int i = 0;
@@ -76,29 +72,29 @@ public class LFUCacheTest{
 
 
         for (int i = 0; i < 5; i++) {
-            cache.addCacheEntry(i, Integer.toString(i + 2));
+            cache.add(i, Integer.toString(i + 2));
             for (int j = 0; j < 15; j++) {
-                cache.getCacheEntry(i);
+                cache.get(i);
             }
         }
 
-        cache.addCacheEntry(5, LFU);
+        cache.add(5, LFU);
         for (int i = 0; i < 10; i++) {
-            cache.getCacheEntry(5);
+            cache.get(5);
         }
 
         for (int i = 6; i < 10; i++) {
-            cache.addCacheEntry(i, Integer.toString(i + 2));
+            cache.add(i, Integer.toString(i + 2));
             for (int j = 0; j < 20; j++) {
-                cache.getCacheEntry(i);
+                cache.get(i);
             }
         }
 
         String str = "new string";
 
-        cache.addCacheEntry(10, str);
+        cache.add(10, str);
 
-        LFU = cache.getCacheEntry(5);
+        LFU = cache.get(5);
 
         Assert.assertEquals("LFU should be null", LFU, null);
 
